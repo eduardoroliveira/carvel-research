@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: app1
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: bb
+  name: bb
+  namespace: app1
+spec:
+  containers:
+  - args:
+    - sleep
+    - "3600"
+    image: busybox
+    name: bb
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

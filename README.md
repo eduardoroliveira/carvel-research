@@ -10,6 +10,22 @@ Is a tool to manage k8s resourses as a bulk (whole).
 
 kapp (pronounced: kap) CLI encourages Kubernetes users to manage resources in bulk by working with "Kubernetes applications" (sets of resources with the same label). It focuses on resource diffing, labeling, deployment and deletion. Unlike tools like Helm, kapp considers YAML templating and management of packages outside of its scope, though it works great with tools that generate Kubernetes configuration.
 
+## Resources
+
+https://carvel.dev/kapp/
+
+https://github.com/vmware-tanzu/carvel-kapp
+
+## Installation
+
+```bash
+wget -O- https://carvel.dev/install.sh | bash
+```
+
+## <span style="color: red"> NOTE</span>
+
+I observed that `kapp` will `NOT` recognize components that were not created by it, for example it `won't` list an existing POD created via kubectl.
+
 ## Features and highlights
 
 - `Lightweight `- does not depend on server side components
@@ -89,24 +105,6 @@ metadata:
     kapp.k14s.io/original: '{"apiVersion":"v1","kind":"Pod","metadata":{"creationTimestamp":null,"labels":{"kapp.k14s.io/app":"1615823732587657000","kapp.k14s.io/association":"v1.da89464db76d580be0c6d241fe0fd9c3","run":"planets"},"name":"planets","namespace":"comp-logs"},"spec":{"containers":[{"args":["Mercury"],"image":"dervilo/genlog","name":"mercury-container","resources":{}},{"args":["Venus"],"image":"dervilo/genlog","name":"venus-container","resources":{}},{"args":["Earth"],"image":"dervilo/genlog","name":"earth-container","resources":{}}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always"},"status":{}}'
 
 ```
-
-
-
-## Resources
-
-https://carvel.dev/kapp/
-
-https://github.com/vmware-tanzu/carvel-kapp
-
-## Installation
-
-```bash
-wget -O- https://carvel.dev/install.sh | bash
-```
-
-## <span style="color: red"> NOTE</span>
-
-I observed that `kapp` will `NOT` recognize components that were not created by it, for example it `won't` list an existing POD created via kubectl.
 
 ## Simple case - POD
 

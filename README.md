@@ -31,6 +31,67 @@ kapp (pronounced: kap) CLI encourages Kubernetes users to manage resources in bu
 - Works without server side components
 - GitOps friendly (kapp app-group deploy -g all-apps --directory .)
 
+## How it works
+
+### Carvel creates configmaps to keep track of the applications and changes. 
+
+```bash
+$ k get cm -n kapp
+NAME                     DATA   AGE
+comp-logs                1      118m
+comp-logs-change-777xx   1      105m
+comp-logs-change-7wfm4   1      118m
+comp-logs-change-wvqwh   1      4m58s
+```
+### Labels are created in the components
+
+Labels are create in the application components to associate them 
+
+```yaml
+$ k describe -n comp-logs pod planets
+Name:         planets
+Namespace:    comp-logs
+Priority:     0
+Node:         docker-desktop/192.168.65.3
+Start Time:   Mon, 15 Mar 2021 12:49:01 -0500
+Labels:       kapp.k14s.io/app=1615823732587657000 # <<<=====
+              kapp.k14s.io/association=v1.da89464db76d580be0c6d241fe0fd9c3
+
+$ k describe -n comp-logs pod elements-64c8b956b9-5zpqj
+Name:         elements-64c8b956b9-5zpqj
+Namespace:    comp-logs
+Priority:     0
+Node:         docker-desktop/192.168.65.3
+Start Time:   Mon, 15 Mar 2021 12:49:01 -0500
+Labels:       app=elements
+              kapp.k14s.io/app=1615823732587657000 # <<<=====
+              kapp.k14s.io/association=v1.6520037ee6d121429bb541043f8b411f
+
+$ k describe -n comp-logs deployment.apps/elements
+Name:                   elements
+Namespace:              comp-logs
+CreationTimestamp:      Mon, 15 Mar 2021 12:49:00 -0500
+Labels:                 app=elements
+                        kapp.k14s.io/app=1615823732587657000 # <<<=====
+                        kapp.k14s.io/association=v1.6520037ee6d121429bb541043f8b411f
+
+```
+
+### Annotations are used to keep the changes
+
+```yaml
+$ k get -n comp-logs pod planets -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kapp.k14s.io/identity: v1;comp-logs//Pod/planets;v1
+    kapp.k14s.io/original: '{"apiVersion":"v1","kind":"Pod","metadata":{"creationTimestamp":null,"labels":{"kapp.k14s.io/app":"1615823732587657000","kapp.k14s.io/association":"v1.da89464db76d580be0c6d241fe0fd9c3","run":"planets"},"name":"planets","namespace":"comp-logs"},"spec":{"containers":[{"args":["Mercury"],"image":"dervilo/genlog","name":"mercury-container","resources":{}},{"args":["Venus"],"image":"dervilo/genlog","name":"venus-container","resources":{}},{"args":["Earth"],"image":"dervilo/genlog","name":"earth-container","resources":{}}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always"},"status":{}}'
+
+```
+
+
+
 ## Resources
 
 https://carvel.dev/kapp/
@@ -43,7 +104,7 @@ https://github.com/vmware-tanzu/carvel-kapp
 wget -O- https://carvel.dev/install.sh | bash
 ```
 
-## <span style="color: red"> NOTE
+## <span style="color: red"> NOTE</span>
 
 I observed that `kapp` will `NOT` recognize components that were not created by it, for example it `won't` list an existing POD created via kubectl.
 
@@ -310,3 +371,33 @@ If nothing else is specified, the deploy will occur in the same namespace than m
 In order to deploy the application in a different namespace than the metadata, you need to use the `--into-ns` flag OR specify the namespace attribute in the component yaml file.
 
 When using the yaml file, you can also include the namespace creation yaml in the very top. If using the `--into-ns` flag, you will need to create the namespace prior than the deployment.
+
+
+## Consolidate logs
+
+Once you compose a kapp application with multiple components, kapp will be able to consolidate the pod logs in a single output. 
+
+There's an example in consolidate-logs-test:
+
+```bash
+kubectl create ns kapp
+
+kubectl create ns comp-logs
+
+kapp deploy -n kapp -a comp-logs --into-ns comp-logs -f planets.yaml -f elements.yaml 
+
+kapp logs -f -n kapp -a comp-logs
+
+# starting tailing 'elements > water-container' logs
+# starting tailing 'planets > earth-container' logs
+planets > earth-container | 2021/03/15 17:40:57 planets
+planets > earth-container | 2021/03/15 17:40:59 planets
+elements > water-container | 2021/03/15 17:40:54 elements
+elements > water-container | 2021/03/15 17:40:56 elements
+elements > water-container | 2021/03/15 17:40:58 elements
+# starting tailing 'planets > mercury-container' logs
+# starting tailing 'planets > venus-container' logs
+# starting tailing 'elements > air-container' logs
+planets > mercury-container | 2021/03/15 17:40:53 planets
+planets > mercury-container | 2021/03/15 17:40:55 planets
+```

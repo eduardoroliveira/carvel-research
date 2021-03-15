@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: elements
+  name: elements
+  namespace: elements
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elements
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: elements
+      name: elements
+    spec:
+      containers:
+      - image: dervilo/genlog
+        name: water-container
+        args:
+        - Water
+        resources: {}
+      - image: dervilo/genlog
+        name: fire-container
+        args:
+        - Fire
+        resources: {}
+      - image: dervilo/genlog
+        name: air-container
+        args:
+        - Air
+        resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+status: {}

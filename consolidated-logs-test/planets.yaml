@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: planets
+  name: planets
+  namespace: planets
+spec:
+  containers:
+  - image: dervilo/genlog
+    name: mercury-container
+    args:
+    - Mercury
+    resources: {}
+  - image: dervilo/genlog
+    name: venus-container
+    args:
+    - Venus
+    resources: {}
+  - image: dervilo/genlog
+    name: earth-container
+    args:
+    - Earth
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
